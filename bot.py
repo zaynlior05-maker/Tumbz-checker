@@ -105,7 +105,7 @@ def lookup_bin(bin_number):
         r = requests.get(
             f"https://lookup.binlist.net/{bin_number}",
             headers={"Accept-Version": "3"},
-            timeout=8
+            timeout=5
         )
         if r.status_code == 200:
             return r.json()
@@ -192,8 +192,6 @@ def process_message(message):
     if not bin_number.isdigit() or not (6 <= len(bin_number) <= 8):
         send_message(chat_id, f"⚠️ Send a valid *6–8 digit* BIN.\n\n👑 *Owner:* {OWNER_TAG}")
         return
-
-    send_message(chat_id, "🔍 Looking up BIN, please wait...")
 
     data = lookup_bin(bin_number)
 
