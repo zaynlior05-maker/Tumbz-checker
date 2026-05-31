@@ -3,7 +3,7 @@ import time
 import logging
 import threading
 
-BOT_TOKEN = "8202857061:AAE5htvT0rcSv1vMjk_tM-9ZKZOPbOv4EOQ"
+BOT_TOKEN = "8202857061:AAGiHhKPux9sdwVRAmCQzs1OcnlcRNL5heA"
 OWNER_TAG = "@TumbzO2"
 API = f"https://api.telegram.org/bot{BOT_TOKEN}"
 
