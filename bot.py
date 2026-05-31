@@ -98,7 +98,7 @@ def format_result(bin_number, data):
     country_name, flag = get_country(country_code)
 
     if brand:
-        category = f"{scheme.upper()} {brand.upper()}".strip()
+        category = brand.upper().replace(scheme.upper(), "").strip()
     elif prepaid:
         category = "PREPAID"
     else:
