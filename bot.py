@@ -10,85 +10,49 @@ API = f"https://api.telegram.org/bot{BOT_TOKEN}"
 logging.basicConfig(level=logging.INFO)
 
 COUNTRY_MAP = {
-    "US": ("United States", "🇺🇸"),
-    "GB": ("United Kingdom", "🇬🇧"),
-    "PT": ("Portugal", "🇵🇹"),
-    "DE": ("Germany", "🇩🇪"),
-    "FR": ("France", "🇫🇷"),
-    "ES": ("Spain", "🇪🇸"),
-    "IT": ("Italy", "🇮🇹"),
-    "BR": ("Brazil", "🇧🇷"),
-    "CA": ("Canada", "🇨🇦"),
-    "AU": ("Australia", "🇦🇺"),
-    "NL": ("Netherlands", "🇳🇱"),
-    "SE": ("Sweden", "🇸🇪"),
-    "NO": ("Norway", "🇳🇴"),
-    "DK": ("Denmark", "🇩🇰"),
-    "PL": ("Poland", "🇵🇱"),
-    "RU": ("Russia", "🇷🇺"),
-    "IN": ("India", "🇮🇳"),
-    "CN": ("China", "🇨🇳"),
-    "JP": ("Japan", "🇯🇵"),
-    "MX": ("Mexico", "🇲🇽"),
-    "ZA": ("South Africa", "🇿🇦"),
-    "NG": ("Nigeria", "🇳🇬"),
-    "GH": ("Ghana", "🇬🇭"),
-    "KE": ("Kenya", "🇰🇪"),
-    "AR": ("Argentina", "🇦🇷"),
-    "IE": ("Ireland", "🇮🇪"),
-    "CH": ("Switzerland", "🇨🇭"),
-    "AT": ("Austria", "🇦🇹"),
-    "BE": ("Belgium", "🇧🇪"),
-    "GR": ("Greece", "🇬🇷"),
-    "TR": ("Turkey", "🇹🇷"),
-    "SA": ("Saudi Arabia", "🇸🇦"),
-    "AE": ("UAE", "🇦🇪"),
-    "SG": ("Singapore", "🇸🇬"),
-    "HK": ("Hong Kong", "🇭🇰"),
-    "NZ": ("New Zealand", "🇳🇿"),
-    "PH": ("Philippines", "🇵🇭"),
-    "MY": ("Malaysia", "🇲🇾"),
-    "ID": ("Indonesia", "🇮🇩"),
-    "TH": ("Thailand", "🇹🇭"),
-    "PK": ("Pakistan", "🇵🇰"),
-    "BD": ("Bangladesh", "🇧🇩"),
-    "EG": ("Egypt", "🇪🇬"),
-    "MA": ("Morocco", "🇲🇦"),
-    "TZ": ("Tanzania", "🇹🇿"),
-    "UG": ("Uganda", "🇺🇬"),
-    "ET": ("Ethiopia", "🇪🇹"),
-    "CO": ("Colombia", "🇨🇴"),
-    "VE": ("Venezuela", "🇻🇪"),
-    "CL": ("Chile", "🇨🇱"),
-    "PE": ("Peru", "🇵🇪"),
-    "UA": ("Ukraine", "🇺🇦"),
-    "CZ": ("Czech Republic", "🇨🇿"),
-    "HU": ("Hungary", "🇭🇺"),
-    "RO": ("Romania", "🇷🇴"),
-    "FI": ("Finland", "🇫🇮"),
-    "SK": ("Slovakia", "🇸🇰"),
-    "HR": ("Croatia", "🇭🇷"),
-    "RS": ("Serbia", "🇷🇸"),
-    "IL": ("Israel", "🇮🇱"),
-    "KW": ("Kuwait", "🇰🇼"),
-    "QA": ("Qatar", "🇶🇦"),
-    "BH": ("Bahrain", "🇧🇭"),
-    "JO": ("Jordan", "🇯🇴"),
-    "LB": ("Lebanon", "🇱🇧"),
-    "ZW": ("Zimbabwe", "🇿🇼"),
-    "ZM": ("Zambia", "🇿🇲"),
-    "SN": ("Senegal", "🇸🇳"),
-    "CI": ("Ivory Coast", "🇨🇮"),
-    "CM": ("Cameroon", "🇨🇲"),
+    "US": ("United States", "🇺🇸"), "GB": ("United Kingdom", "🇬🇧"),
+    "PT": ("Portugal", "🇵🇹"), "DE": ("Germany", "🇩🇪"),
+    "FR": ("France", "🇫🇷"), "ES": ("Spain", "🇪🇸"),
+    "IT": ("Italy", "🇮🇹"), "BR": ("Brazil", "🇧🇷"),
+    "CA": ("Canada", "🇨🇦"), "AU": ("Australia", "🇦🇺"),
+    "NL": ("Netherlands", "🇳🇱"), "SE": ("Sweden", "🇸🇪"),
+    "NO": ("Norway", "🇳🇴"), "DK": ("Denmark", "🇩🇰"),
+    "PL": ("Poland", "🇵🇱"), "RU": ("Russia", "🇷🇺"),
+    "IN": ("India", "🇮🇳"), "CN": ("China", "🇨🇳"),
+    "JP": ("Japan", "🇯🇵"), "MX": ("Mexico", "🇲🇽"),
+    "ZA": ("South Africa", "🇿🇦"), "NG": ("Nigeria", "🇳🇬"),
+    "GH": ("Ghana", "🇬🇭"), "KE": ("Kenya", "🇰🇪"),
+    "AR": ("Argentina", "🇦🇷"), "IE": ("Ireland", "🇮🇪"),
+    "CH": ("Switzerland", "🇨🇭"), "AT": ("Austria", "🇦🇹"),
+    "BE": ("Belgium", "🇧🇪"), "GR": ("Greece", "🇬🇷"),
+    "TR": ("Turkey", "🇹🇷"), "SA": ("Saudi Arabia", "🇸🇦"),
+    "AE": ("UAE", "🇦🇪"), "SG": ("Singapore", "🇸🇬"),
+    "HK": ("Hong Kong", "🇭🇰"), "NZ": ("New Zealand", "🇳🇿"),
+    "PH": ("Philippines", "🇵🇭"), "MY": ("Malaysia", "🇲🇾"),
+    "ID": ("Indonesia", "🇮🇩"), "TH": ("Thailand", "🇹🇭"),
+    "PK": ("Pakistan", "🇵🇰"), "BD": ("Bangladesh", "🇧🇩"),
+    "EG": ("Egypt", "🇪🇬"), "MA": ("Morocco", "🇲🇦"),
+    "TZ": ("Tanzania", "🇹🇿"), "UG": ("Uganda", "🇺🇬"),
+    "ET": ("Ethiopia", "🇪🇹"), "CO": ("Colombia", "🇨🇴"),
+    "VE": ("Venezuela", "🇻🇪"), "CL": ("Chile", "🇨🇱"),
+    "PE": ("Peru", "🇵🇪"), "UA": ("Ukraine", "🇺🇦"),
+    "CZ": ("Czech Republic", "🇨🇿"), "HU": ("Hungary", "🇭🇺"),
+    "RO": ("Romania", "🇷🇴"), "FI": ("Finland", "🇫🇮"),
+    "SK": ("Slovakia", "🇸🇰"), "HR": ("Croatia", "🇭🇷"),
+    "RS": ("Serbia", "🇷🇸"), "IL": ("Israel", "🇮🇱"),
+    "KW": ("Kuwait", "🇰🇼"), "QA": ("Qatar", "🇶🇦"),
+    "BH": ("Bahrain", "🇧🇭"), "JO": ("Jordan", "🇯🇴"),
+    "LB": ("Lebanon", "🇱🇧"), "ZW": ("Zimbabwe", "🇿🇼"),
+    "ZM": ("Zambia", "🇿🇲"), "SN": ("Senegal", "🇸🇳"),
+    "CI": ("Ivory Coast", "🇨🇮"), "CM": ("Cameroon", "🇨🇲"),
+    "SI": ("Slovenia", "🇸🇮"), "LU": ("Luxembourg", "🇱🇺"),
+    "CY": ("Cyprus", "🇨🇾"), "MT": ("Malta", "🇲🇹"),
 }
 
 def get_country(code):
     if not code:
         return "", ""
-    code = code.upper()
-    if code in COUNTRY_MAP:
-        return COUNTRY_MAP[code]
-    return code, ""  # fallback to just showing the code
+    return COUNTRY_MAP.get(code.upper(), (code.upper(), ""))
 
 def send_message(chat_id, text):
     try:
@@ -101,33 +65,36 @@ def send_message(chat_id, text):
         logging.error(f"Failed to send message: {e}")
 
 def lookup_bin(bin_number):
-    try:
-        r = requests.get(
-            f"https://lookup.binlist.net/{bin_number}",
-            headers={"Accept-Version": "3"},
-            timeout=5
-        )
-        if r.status_code == 200:
-            return r.json()
-        elif r.status_code == 429:
-            return "rate_limit"
-        return None
-    except requests.exceptions.Timeout:
-        return "timeout"
-    except Exception:
-        return None
+    # Retry up to 3 times on rate limit
+    for attempt in range(3):
+        try:
+            r = requests.get(
+                f"https://lookup.binlist.net/{bin_number}",
+                headers={"Accept-Version": "3"},
+                timeout=5
+            )
+            if r.status_code == 200:
+                return r.json()
+            elif r.status_code == 429:
+                time.sleep(2)
+                continue
+            return None
+        except requests.exceptions.Timeout:
+            return "timeout"
+        except Exception:
+            return None
+    return "rate_limit"
 
 def format_result(bin_number, data):
-    bank         = data.get("bank", {})
-    country      = data.get("country", {})
-    scheme       = data.get("scheme", "")
-    card_type    = data.get("type", "")
-    brand        = data.get("brand", "")
-    prepaid      = data.get("prepaid", False)
+    bank      = data.get("bank", {})
+    country   = data.get("country", {})
+    scheme    = data.get("scheme", "")
+    card_type = data.get("type", "")
+    brand     = data.get("brand", "")
+    prepaid   = data.get("prepaid", False)
 
     bank_name    = bank.get("name", "")
     country_code = country.get("alpha2", "")
-
     country_name, flag = get_country(country_code)
 
     if brand:
@@ -138,7 +105,6 @@ def format_result(bin_number, data):
         category = ""
 
     lines = [f"💳 *BIN:* `{bin_number}`"]
-
     if bank_name:
         lines.append(f"🏦 *Bank:* {bank_name.title()}")
     if country_name:
@@ -149,10 +115,8 @@ def format_result(bin_number, data):
         lines.append(f"📋 *Type:* {card_type.upper()}")
     if category:
         lines.append(f"🏷️ *Category:* {category}")
-
-    lines.append(f"――――――――――――――")
+    lines.append("――――――――――――――")
     lines.append(f"👑 *Owner:* {OWNER_TAG}")
-
     return "\n".join(lines)
 
 def process_message(message):
@@ -162,6 +126,7 @@ def process_message(message):
     if not chat_id or not text:
         return
 
+    # Handle commands
     if text.startswith("/start"):
         send_message(chat_id,
             f"👋 *Welcome to Tumbz BIN Bot!*\n\n"
@@ -180,6 +145,7 @@ def process_message(message):
         )
         return
 
+    # Handle /bin and /heisen commands
     if text.lower().startswith(("/bin", "/heisen")):
         parts = text.split()
         if len(parts) < 2:
@@ -187,17 +153,17 @@ def process_message(message):
             return
         bin_number = parts[1]
     else:
-        bin_number = text.replace(" ", "")
-
-    if not bin_number.isdigit() or not (6 <= len(bin_number) <= 8):
-        send_message(chat_id, f"⚠️ Send a valid *6–8 digit* BIN.\n\n👑 *Owner:* {OWNER_TAG}")
-        return
+        # Only respond if message is purely digits, no spaces, 6-8 chars
+        # "1 2", "hi", "123" etc. are all silently ignored
+        bin_number = text
+        if not bin_number.isdigit() or not (6 <= len(bin_number) <= 8):
+            return
 
     data = lookup_bin(bin_number)
 
     if data == "rate_limit":
         send_message(chat_id,
-            f"⏳ *Too many requests.* Please wait a moment and try again.\n\n"
+            f"⏳ *Rate limited.* Please try again in a few seconds.\n\n"
             f"👑 *Owner:* {OWNER_TAG}"
         )
     elif data == "timeout":
@@ -209,8 +175,7 @@ def process_message(message):
         send_message(chat_id, format_result(bin_number, data))
     else:
         send_message(chat_id,
-            f"❌ *BIN `{bin_number}` not found.*\n\n"
-            f"This BIN may not be in the database.\n\n"
+            f"❌ *Invalid BIN.* Not found in database.\n\n"
             f"👑 *Owner:* {OWNER_TAG}"
         )
 
