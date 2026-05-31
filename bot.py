@@ -9,16 +9,86 @@ API = f"https://api.telegram.org/bot{BOT_TOKEN}"
 
 logging.basicConfig(level=logging.INFO)
 
-FLAG_MAP = {
-    "US": "🇺🇸", "GB": "🇬🇧", "PT": "🇵🇹", "DE": "🇩🇪", "FR": "🇫🇷",
-    "ES": "🇪🇸", "IT": "🇮🇹", "BR": "🇧🇷", "CA": "🇨🇦", "AU": "🇦🇺",
-    "NL": "🇳🇱", "SE": "🇸🇪", "NO": "🇳🇴", "DK": "🇩🇰", "PL": "🇵🇱",
-    "RU": "🇷🇺", "IN": "🇮🇳", "CN": "🇨🇳", "JP": "🇯🇵", "MX": "🇲🇽",
-    "ZA": "🇿🇦", "NG": "🇳🇬", "GH": "🇬🇭", "KE": "🇰🇪", "AR": "🇦🇷",
+COUNTRY_MAP = {
+    "US": ("United States", "🇺🇸"),
+    "GB": ("United Kingdom", "🇬🇧"),
+    "PT": ("Portugal", "🇵🇹"),
+    "DE": ("Germany", "🇩🇪"),
+    "FR": ("France", "🇫🇷"),
+    "ES": ("Spain", "🇪🇸"),
+    "IT": ("Italy", "🇮🇹"),
+    "BR": ("Brazil", "🇧🇷"),
+    "CA": ("Canada", "🇨🇦"),
+    "AU": ("Australia", "🇦🇺"),
+    "NL": ("Netherlands", "🇳🇱"),
+    "SE": ("Sweden", "🇸🇪"),
+    "NO": ("Norway", "🇳🇴"),
+    "DK": ("Denmark", "🇩🇰"),
+    "PL": ("Poland", "🇵🇱"),
+    "RU": ("Russia", "🇷🇺"),
+    "IN": ("India", "🇮🇳"),
+    "CN": ("China", "🇨🇳"),
+    "JP": ("Japan", "🇯🇵"),
+    "MX": ("Mexico", "🇲🇽"),
+    "ZA": ("South Africa", "🇿🇦"),
+    "NG": ("Nigeria", "🇳🇬"),
+    "GH": ("Ghana", "🇬🇭"),
+    "KE": ("Kenya", "🇰🇪"),
+    "AR": ("Argentina", "🇦🇷"),
+    "IE": ("Ireland", "🇮🇪"),
+    "CH": ("Switzerland", "🇨🇭"),
+    "AT": ("Austria", "🇦🇹"),
+    "BE": ("Belgium", "🇧🇪"),
+    "GR": ("Greece", "🇬🇷"),
+    "TR": ("Turkey", "🇹🇷"),
+    "SA": ("Saudi Arabia", "🇸🇦"),
+    "AE": ("UAE", "🇦🇪"),
+    "SG": ("Singapore", "🇸🇬"),
+    "HK": ("Hong Kong", "🇭🇰"),
+    "NZ": ("New Zealand", "🇳🇿"),
+    "PH": ("Philippines", "🇵🇭"),
+    "MY": ("Malaysia", "🇲🇾"),
+    "ID": ("Indonesia", "🇮🇩"),
+    "TH": ("Thailand", "🇹🇭"),
+    "PK": ("Pakistan", "🇵🇰"),
+    "BD": ("Bangladesh", "🇧🇩"),
+    "EG": ("Egypt", "🇪🇬"),
+    "MA": ("Morocco", "🇲🇦"),
+    "TZ": ("Tanzania", "🇹🇿"),
+    "UG": ("Uganda", "🇺🇬"),
+    "ET": ("Ethiopia", "🇪🇹"),
+    "CO": ("Colombia", "🇨🇴"),
+    "VE": ("Venezuela", "🇻🇪"),
+    "CL": ("Chile", "🇨🇱"),
+    "PE": ("Peru", "🇵🇪"),
+    "UA": ("Ukraine", "🇺🇦"),
+    "CZ": ("Czech Republic", "🇨🇿"),
+    "HU": ("Hungary", "🇭🇺"),
+    "RO": ("Romania", "🇷🇴"),
+    "FI": ("Finland", "🇫🇮"),
+    "SK": ("Slovakia", "🇸🇰"),
+    "HR": ("Croatia", "🇭🇷"),
+    "RS": ("Serbia", "🇷🇸"),
+    "IL": ("Israel", "🇮🇱"),
+    "KW": ("Kuwait", "🇰🇼"),
+    "QA": ("Qatar", "🇶🇦"),
+    "BH": ("Bahrain", "🇧🇭"),
+    "JO": ("Jordan", "🇯🇴"),
+    "LB": ("Lebanon", "🇱🇧"),
+    "ZW": ("Zimbabwe", "🇿🇼"),
+    "ZM": ("Zambia", "🇿🇲"),
+    "SN": ("Senegal", "🇸🇳"),
+    "CI": ("Ivory Coast", "🇨🇮"),
+    "CM": ("Cameroon", "🇨🇲"),
 }
 
-def get_flag(code):
-    return FLAG_MAP.get(code.upper(), "") if code else ""
+def get_country(code):
+    if not code:
+        return "", ""
+    code = code.upper()
+    if code in COUNTRY_MAP:
+        return COUNTRY_MAP[code]
+    return code, ""  # fallback to just showing the code
 
 def send_message(chat_id, text):
     try:
@@ -56,9 +126,9 @@ def format_result(bin_number, data):
     prepaid      = data.get("prepaid", False)
 
     bank_name    = bank.get("name", "")
-    country_name = country.get("name", "")
     country_code = country.get("alpha2", "")
-    flag         = get_flag(country_code)
+
+    country_name, flag = get_country(country_code)
 
     if brand:
         category = f"{scheme.upper()} {brand.upper()}".strip()
@@ -72,7 +142,7 @@ def format_result(bin_number, data):
     if bank_name:
         lines.append(f"🏦 *Bank:* {bank_name.title()}")
     if country_name:
-        lines.append(f"🌍 *Country:* {country_name} {flag}")
+        lines.append(f"🌍 *Country:* {country_name} {flag}".strip())
     if scheme:
         lines.append(f"🔖 *Brand:* {scheme.upper()}")
     if card_type:
@@ -85,41 +155,6 @@ def format_result(bin_number, data):
 
     return "\n".join(lines)
 
-def extract_bins(text):
-    """Extract all valid 6-8 digit BINs from a message (one per line)."""
-    bins = []
-    for line in text.splitlines():
-        b = line.strip().replace(" ", "")
-        if b.isdigit() and 6 <= len(b) <= 8:
-            bins.append(b)
-    return bins
-
-def process_single_bin(chat_id, bin_number, index, total):
-    """Look up one BIN and send result."""
-    data = lookup_bin(bin_number)
-
-    if data == "rate_limit":
-        send_message(chat_id,
-            f"⏳ *BIN `{bin_number}` — Rate limited.* Try again in a moment.\n\n"
-            f"👑 *Owner:* {OWNER_TAG}"
-        )
-    elif data == "timeout":
-        send_message(chat_id,
-            f"⌛ *BIN `{bin_number}` — Timed out.* Try again.\n\n"
-            f"👑 *Owner:* {OWNER_TAG}"
-        )
-    elif data:
-        send_message(chat_id, format_result(bin_number, data))
-    else:
-        send_message(chat_id,
-            f"❌ *BIN `{bin_number}` not found.*\n\n"
-            f"👑 *Owner:* {OWNER_TAG}"
-        )
-
-    # Small delay between lookups to avoid rate limiting
-    if index < total - 1:
-        time.sleep(1)
-
 def process_message(message):
     chat_id = message.get("chat", {}).get("id")
     text    = message.get("text", "").strip()
@@ -131,8 +166,7 @@ def process_message(message):
         send_message(chat_id,
             f"👋 *Welcome to Tumbz BIN Bot!*\n\n"
             f"Send me any 6–8 digit BIN to look it up.\n\n"
-            f"You can also send *multiple BINs* at once, one per line:\n"
-            f"`535772`\n`465865`\n`411111`\n\n"
+            f"Example: `535772` & get full info\n\n"
             f"👑 *Owner:* {OWNER_TAG}"
         )
         return
@@ -141,33 +175,46 @@ def process_message(message):
         send_message(chat_id,
             f"👋 *Welcome to Tumbz BIN Bot!*\n\n"
             f"Send me any 6–8 digit BIN to look it up.\n\n"
-            f"You can also send *multiple BINs* at once, one per line:\n"
-            f"`535772`\n`465865`\n`411111`\n\n"
+            f"Example: `535772` & get full info\n\n"
             f"👑 *Owner:* {OWNER_TAG}"
         )
         return
 
-    # Handle /bin or /heisen commands
     if text.lower().startswith(("/bin", "/heisen")):
         parts = text.split()
         if len(parts) < 2:
             send_message(chat_id, f"⚠️ Usage: `/bin 535772`\n\n👑 *Owner:* {OWNER_TAG}")
             return
-        bins = [parts[1].strip()]
+        bin_number = parts[1]
     else:
-        bins = extract_bins(text)
+        bin_number = text.replace(" ", "")
 
-    if not bins:
+    if not bin_number.isdigit() or not (6 <= len(bin_number) <= 8):
         send_message(chat_id, f"⚠️ Send a valid *6–8 digit* BIN.\n\n👑 *Owner:* {OWNER_TAG}")
         return
 
-    # If multiple BINs, notify how many were found
-    if len(bins) > 1:
-        send_message(chat_id, f"🔍 Found *{len(bins)} BINs* — looking them all up...")
+    send_message(chat_id, "🔍 Looking up BIN, please wait...")
 
-    # Look up each BIN sequentially in this thread
-    for i, bin_number in enumerate(bins):
-        process_single_bin(chat_id, bin_number, i, len(bins))
+    data = lookup_bin(bin_number)
+
+    if data == "rate_limit":
+        send_message(chat_id,
+            f"⏳ *Too many requests.* Please wait a moment and try again.\n\n"
+            f"👑 *Owner:* {OWNER_TAG}"
+        )
+    elif data == "timeout":
+        send_message(chat_id,
+            f"⌛ *Lookup timed out.* Please try again.\n\n"
+            f"👑 *Owner:* {OWNER_TAG}"
+        )
+    elif data:
+        send_message(chat_id, format_result(bin_number, data))
+    else:
+        send_message(chat_id,
+            f"❌ *BIN `{bin_number}` not found.*\n\n"
+            f"This BIN may not be in the database.\n\n"
+            f"👑 *Owner:* {OWNER_TAG}"
+        )
 
 def handle_update(update):
     message = update.get("message")
