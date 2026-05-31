@@ -1,12 +1,10 @@
-
-
-import logging
 import requests
-from telegram import Update
-from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
+import time
+import logging
 
 BOT_TOKEN = "8202857061:AAEwNDBWhTEgqNOT865uHjRhhrImJYgPbpk"
 OWNER_TAG = "@TumbzO2"
+API = f"https://api.telegram.org/bot{BOT_TOKEN}"
 
 logging.basicConfig(level=logging.INFO)
 
@@ -18,71 +16,44 @@ FLAG_MAP = {
     "ZA": "🇿🇦", "NG": "🇳🇬", "GH": "🇬🇭", "KE": "🇰🇪", "AR": "🇦🇷",
 }
 
-def get_flag(country_code: str) -> str:
-    return FLAG_MAP.get(country_code.upper(), "🏳️") if country_code else "🏳️"
+def get_flag(code):
+    return FLAG_MAP.get(code.upper(), "🏳️") if code else "🏳️"
 
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(
-        f"👋 *Welcome to BIN Checker Bot!*\n\n"
-        f"Just send me a BIN (first 6–8 digits of a card) and I'll look it up.\n\n"
-        f"Example: `535772`\n\n"
-        f"👑 *Owner:* {OWNER_TAG}",
-        parse_mode="Markdown"
-    )
+def send_message(chat_id, text):
+    requests.post(f"{API}/sendMessage", json={
+        "chat_id": chat_id,
+        "text": text,
+        "parse_mode": "Markdown"
+    })
 
-async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(
-        f"📖 *How to use:*\n\n"
-        f"Simply type any 6–8 digit BIN number.\n\n"
-        f"I'll return:\n"
-        f"• 🏦 Bank name\n"
-        f"• 🌍 Country\n"
-        f"• 💳 Card brand & type\n"
-        f"• 📋 Category\n"
-        f"• 📞 Bank phone & website\n\n"
-        f"👑 *Owner:* {OWNER_TAG}",
-        parse_mode="Markdown"
-    )
-
-def lookup_bin(bin_number: str):
+def lookup_bin(bin_number):
     try:
-        headers = {"Accept-Version": "3"}
-        response = requests.get(
+        r = requests.get(
             f"https://lookup.binlist.net/{bin_number}",
-            headers=headers,
+            headers={"Accept-Version": "3"},
             timeout=10
         )
-        if response.status_code == 200:
-            return response.json()
-        return None
+        return r.json() if r.status_code == 200 else None
     except Exception:
         return None
 
-def format_result(bin_number: str, data: dict) -> str:
+def format_result(bin_number, data):
     scheme    = data.get("scheme", "N/A").upper()
     card_type = data.get("type", "N/A").upper()
+    brand     = data.get("brand", None)
+    prepaid   = data.get("prepaid", False)
+    category  = str(brand).upper() if brand else ("PREPAID" if prepaid else "N/A")
 
-    brand = data.get("brand", None)
-    prepaid_raw = data.get("prepaid", None)
-    if brand:
-        category = str(brand).upper()
-    elif isinstance(prepaid_raw, bool) and prepaid_raw:
-        category = "PREPAID"
-    else:
-        category = "N/A"
+    bank      = data.get("bank", {})
+    bank_name = bank.get("name", "N/A")
+    bank_phone= bank.get("phone", "N/A")
+    bank_url  = bank.get("url", "N/A")
 
-    bank_info  = data.get("bank", {})
-    bank_name  = bank_info.get("name", "N/A")
-    bank_phone = bank_info.get("phone", "N/A")
-    bank_url   = bank_info.get("url", "N/A")
-
-    country_info  = data.get("country", {})
-    country_name  = country_info.get("name", "N/A")
-    country_code  = country_info.get("alpha2", "")
-    flag          = get_flag(country_code)
-    currency      = country_info.get("currency", "N/A")
-
-    prepaid = "✅ Yes" if prepaid_raw else "❌ No"
+    country      = data.get("country", {})
+    country_name = country.get("name", "N/A")
+    country_code = country.get("alpha2", "")
+    currency     = country.get("currency", "N/A")
+    flag         = get_flag(country_code)
 
     return (
         f"━━━━━━━━━━━━━━━━━━\n"
@@ -95,60 +66,79 @@ def format_result(bin_number: str, data: dict) -> str:
         f"🔖 *Brand:* {scheme}\n"
         f"📋 *Type:* {card_type}\n"
         f"🏷️ *Category:* {category}\n"
-        f"💰 *Prepaid:* {prepaid}\n"
+        f"💰 *Prepaid:* {'✅ Yes' if prepaid else '❌ No'}\n"
         f"📞 *Phone:* {bank_phone}\n"
         f"🌐 *Website:* {bank_url}\n"
         f"━━━━━━━━━━━━━━━━━━\n"
         f"👑 *Owner:* {OWNER_TAG}"
     )
 
-async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    text = update.message.text.strip()
+def handle_update(update):
+    message = update.get("message", {})
+    chat_id = message.get("chat", {}).get("id")
+    text    = message.get("text", "").strip()
 
-    # Support /bin 535772 , /heisen 535772, or plain 535772
-    if text.lower().startswith(("/bin", "/heisen")):
-        parts = text.split()
-        if len(parts) < 2:
-            await update.message.reply_text(
-                f"⚠️ Please provide a BIN.\nExample: `/bin 535772`\n\n👑 *Owner:* {OWNER_TAG}",
-                parse_mode="Markdown"
-            )
-            return
-        bin_number = parts[1].strip()
-    else:
-        bin_number = text.replace(" ", "")
+    if not chat_id or not text:
+        return
 
-    if not bin_number.isdigit() or not (6 <= len(bin_number) <= 8):
-        await update.message.reply_text(
-            f"⚠️ Please send a valid *6–8 digit* BIN number.\n\n👑 *Owner:* {OWNER_TAG}",
-            parse_mode="Markdown"
+    # Commands
+    if text in ("/start", "/start@" + BOT_TOKEN):
+        send_message(chat_id,
+            f"👋 *Welcome to BIN Checker Bot!*\n\n"
+            f"Send me any 6–8 digit BIN to look it up.\n\n"
+            f"Example: `535772`\n\n"
+            f"👑 *Owner:* {OWNER_TAG}"
         )
         return
 
-    loading_msg = await update.message.reply_text("🔍 Looking up BIN, please wait...")
+    if text.startswith("/help"):
+        send_message(chat_id,
+            f"📖 *How to use:*\n\nSend any 6–8 digit BIN number.\n\n"
+            f"Supports: plain `535772`, `/bin 535772`, `/heisen 535772`\n\n"
+            f"👑 *Owner:* {OWNER_TAG}"
+        )
+        return
+
+    # Extract BIN from /bin or /heisen commands
+    if text.lower().startswith(("/bin", "/heisen")):
+        parts = text.split()
+        if len(parts) < 2:
+            send_message(chat_id, f"⚠️ Usage: `/bin 535772`\n\n👑 *Owner:* {OWNER_TAG}")
+            return
+        bin_number = parts[1]
+    else:
+        bin_number = text.replace(" ", "")
+
+    # Validate
+    if not bin_number.isdigit() or not (6 <= len(bin_number) <= 8):
+        send_message(chat_id, f"⚠️ Send a valid *6–8 digit* BIN.\n\n👑 *Owner:* {OWNER_TAG}")
+        return
+
+    send_message(chat_id, "🔍 Looking up BIN, please wait...")
 
     data = lookup_bin(bin_number)
-
     if data:
-        result = format_result(bin_number, data)
-        await loading_msg.edit_text(result, parse_mode="Markdown")
+        send_message(chat_id, format_result(bin_number, data))
     else:
-        await loading_msg.edit_text(
-            f"❌ *BIN `{bin_number}` not found.*\n\nThis BIN may not be in the database.\n\n👑 *Owner:* {OWNER_TAG}",
-            parse_mode="Markdown"
+        send_message(chat_id,
+            f"❌ *BIN `{bin_number}` not found.*\n\n"
+            f"This BIN may not be in the database.\n\n"
+            f"👑 *Owner:* {OWNER_TAG}"
         )
 
 def main():
-    app = Application.builder().token(BOT_TOKEN).build()
-
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(CommandHandler("help", help_command))
-    app.add_handler(CommandHandler("bin", handle_message))
-    app.add_handler(CommandHandler("heisen", handle_message))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
-
+    offset = 0
     print("🤖 Bot is running...")
-    app.run_polling()
+    while True:
+        try:
+            r = requests.get(f"{API}/getUpdates", params={"offset": offset, "timeout": 30}, timeout=35)
+            updates = r.json().get("result", [])
+            for update in updates:
+                offset = update["update_id"] + 1
+                handle_update(update)
+        except Exception as e:
+            logging.error(f"Error: {e}")
+            time.sleep(3)
 
 if __name__ == "__main__":
     main()
