@@ -2,7 +2,7 @@ import requests
 import time
 import logging
 
-BOT_TOKEN = "8202857061:AAEwNDBWhTEgqNOT865uHjRhhrImJYgPbpk"
+BOT_TOKEN = "8202857061:AAE5htvT0rcSv1vMjk_tM-9ZKZOPbOv4EOQ"
 OWNER_TAG = "@TumbzO2"
 API = f"https://api.telegram.org/bot{BOT_TOKEN}"
 
@@ -11,13 +11,13 @@ logging.basicConfig(level=logging.INFO)
 FLAG_MAP = {
     "US": "🇺🇸", "GB": "🇬🇧", "PT": "🇵🇹", "DE": "🇩🇪", "FR": "🇫🇷",
     "ES": "🇪🇸", "IT": "🇮🇹", "BR": "🇧🇷", "CA": "🇨🇦", "AU": "🇦🇺",
-    "NL": "🇳🇱", "SE": "🇸🇪", "NO": "🇳🇴", "DK": "🇩🇰", "PL": "🇵🇱",
+    "NL": "🇳🇱", "SE": "🇸🇪", "NO": "🇳", "DK": "🇩🇰", "PL": "🇵🇱",
     "RU": "🇷🇺", "IN": "🇮🇳", "CN": "🇨🇳", "JP": "🇯🇵", "MX": "🇲🇽",
     "ZA": "🇿🇦", "NG": "🇳🇬", "GH": "🇬🇭", "KE": "🇰🇪", "AR": "🇦🇷",
 }
 
 def get_flag(code):
-    return FLAG_MAP.get(code.upper(), "🏳️") if code else "🏳️"
+    return FLAG_MAP.get(code.upper(), "") if code else ""
 
 def send_message(chat_id, text):
     requests.post(f"{API}/sendMessage", json={
@@ -38,40 +38,49 @@ def lookup_bin(bin_number):
         return None
 
 def format_result(bin_number, data):
-    scheme    = data.get("scheme", "N/A").upper()
-    card_type = data.get("type", "N/A").upper()
-    brand     = data.get("brand", None)
-    prepaid   = data.get("prepaid", False)
-    category  = str(brand).upper() if brand else ("PREPAID" if prepaid else "N/A")
-
-    bank      = data.get("bank", {})
-    bank_name = bank.get("name", "N/A")
-    bank_phone= bank.get("phone", "N/A")
-    bank_url  = bank.get("url", "N/A")
-
+    bank         = data.get("bank", {})
     country      = data.get("country", {})
-    country_name = country.get("name", "N/A")
+    scheme       = data.get("scheme", "")
+    card_type    = data.get("type", "")
+    brand        = data.get("brand", "")
+    prepaid      = data.get("prepaid", False)
+
+    bank_name    = bank.get("name", "")
+    country_name = country.get("name", "")
     country_code = country.get("alpha2", "")
-    currency     = country.get("currency", "N/A")
     flag         = get_flag(country_code)
 
-    return (
-        f"━━━━━━━━━━━━━━━━━━\n"
-        f"🔍 *BIN Lookup Result*\n"
-        f"━━━━━━━━━━━━━━━━━━\n"
-        f"💳 *BIN:* `{bin_number}`\n"
-        f"🏦 *Bank:* {bank_name}\n"
-        f"🌍 *Country:* {flag} {country_name} ({country_code})\n"
-        f"💵 *Currency:* {currency}\n"
-        f"🔖 *Brand:* {scheme}\n"
-        f"📋 *Type:* {card_type}\n"
-        f"🏷️ *Category:* {category}\n"
-        f"💰 *Prepaid:* {'✅ Yes' if prepaid else '❌ No'}\n"
-        f"📞 *Phone:* {bank_phone}\n"
-        f"🌐 *Website:* {bank_url}\n"
-        f"━━━━━━━━━━━━━━━━━━\n"
-        f"👑 *Owner:* {OWNER_TAG}"
-    )
+    # Build category: prefer brand, fallback to prepaid label
+    if brand:
+        category = f"{scheme.upper()} {brand.upper()}".strip()
+    elif prepaid:
+        category = "PREPAID"
+    else:
+        category = ""
+
+    lines = [
+        f"💳 *BIN:* `{bin_number}`",
+    ]
+
+    if bank_name:
+        lines.append(f"🏦 *Bank:* {bank_name.title()}")
+
+    if country_name:
+        lines.append(f"🌍 *Country:* {country_name} {flag}")
+
+    if scheme:
+        lines.append(f"🔖 *Brand:* {scheme.upper()}")
+
+    if card_type:
+        lines.append(f"📋 *Type:* {card_type.upper()}")
+
+    if category:
+        lines.append(f"🏷️ *Category:* {category}")
+
+    lines.append(f"――――――――――――――")
+    lines.append(f"👑 *Owner:* {OWNER_TAG}")
+
+    return "\n".join(lines)
 
 def handle_update(update):
     message = update.get("message", {})
@@ -81,25 +90,24 @@ def handle_update(update):
     if not chat_id or not text:
         return
 
-    # Commands
-    if text in ("/start", "/start@" + BOT_TOKEN):
+    if text.startswith("/start"):
         send_message(chat_id,
-            f"👋 *Welcome to BIN Checker Bot!*\n\n"
+            f"👋 *Welcome to Tumbz BIN Bot!*\n\n"
             f"Send me any 6–8 digit BIN to look it up.\n\n"
-            f"Example: `535772`\n\n"
+            f"Example: `535772` & get full info\n\n"
             f"👑 *Owner:* {OWNER_TAG}"
         )
         return
 
     if text.startswith("/help"):
         send_message(chat_id,
-            f"📖 *How to use:*\n\nSend any 6–8 digit BIN number.\n\n"
-            f"Supports: plain `535772`, `/bin 535772`, `/heisen 535772`\n\n"
+            f"👋 *Welcome to Tumbz BIN Bot!*\n\n"
+            f"Send me any 6–8 digit BIN to look it up.\n\n"
+            f"Example: `535772` & get full info\n\n"
             f"👑 *Owner:* {OWNER_TAG}"
         )
         return
 
-    # Extract BIN from /bin or /heisen commands
     if text.lower().startswith(("/bin", "/heisen")):
         parts = text.split()
         if len(parts) < 2:
@@ -109,7 +117,6 @@ def handle_update(update):
     else:
         bin_number = text.replace(" ", "")
 
-    # Validate
     if not bin_number.isdigit() or not (6 <= len(bin_number) <= 8):
         send_message(chat_id, f"⚠️ Send a valid *6–8 digit* BIN.\n\n👑 *Owner:* {OWNER_TAG}")
         return
@@ -128,7 +135,7 @@ def handle_update(update):
 
 def main():
     offset = 0
-    print("🤖 Bot is running...")
+    print("🤖 Tumbz BIN Bot is running...")
     while True:
         try:
             r = requests.get(f"{API}/getUpdates", params={"offset": offset, "timeout": 30}, timeout=35)
